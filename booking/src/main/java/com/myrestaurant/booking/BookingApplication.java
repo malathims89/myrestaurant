@@ -26,7 +26,7 @@ public class BookingApplication {
 	                    .addCustomReader(new JacksonJaxbJsonProvider())
 	            )
 	            .start();
-	        logger.info("API example: " + server.uri().resolve("/users"));
+	        logger.info("API example: " + server.uri().resolve("/booking/listAllBookings"));
 	    }
 
     
