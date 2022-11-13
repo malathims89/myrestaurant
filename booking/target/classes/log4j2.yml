@@ -1,0 +1,14 @@
+Configuration:
+  name: Default
+  Appenders:
+    Console:
+      name: LogToConsole
+      target: SYSTEM_OUT
+      PatternLayout:
+        pattern: "%d [%t] %-5p %c - %m%n"
+  Loggers:
+      Logger:
+        - name: com.myrestaurant.booking
+          level: debug
+          AppenderRef:
+            - ref: LogToConsole
