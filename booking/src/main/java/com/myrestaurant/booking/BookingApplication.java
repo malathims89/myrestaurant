@@ -9,25 +9,25 @@ import com.myrestaurant.booking.handler.BookingHandler;
 import io.muserver.MuServer;
 import io.muserver.MuServerBuilder;
 import io.muserver.rest.RestHandlerBuilder;
+
 /**
- * A simple Restaurant Booking Application
- * using muserver
- *@author malathi
+ * A simple Restaurant Booking Application using muserver
+ * 
+ * @author malathi
  */
 public class BookingApplication {
 	private static final Logger logger = LogManager.getLogger(BookingApplication.class);
 
-	 public static void main(String[] args) {
-	        BookingHandler bookingHandler = new BookingHandler();
-	        MuServer server = MuServerBuilder.httpServer()
-	            .addHandler(
-	                RestHandlerBuilder.restHandler(bookingHandler)
-	                    .addCustomWriter(new JacksonJaxbJsonProvider())
-	                    .addCustomReader(new JacksonJaxbJsonProvider())
-	            )
-	            .start();
-	        logger.info("API example: " + server.uri().resolve("/booking/listAllBookings"));
-	    }
+	public static void main(String[] args) {
+		
+		//REST handler for restaurant booking use cases
+		BookingHandler bookingHandler = new BookingHandler();
+		
+		MuServer server = MuServerBuilder.httpServer().withHttpPort(8080)
+				.addHandler(RestHandlerBuilder.restHandler(bookingHandler)
+						.addCustomWriter(new JacksonJaxbJsonProvider()).addCustomReader(new JacksonJaxbJsonProvider()))
+				.start();
+		logger.info("API example: " + server.uri().resolve("/booking/listAllBookings"));
+	}
 
-    
 }
