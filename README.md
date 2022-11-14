@@ -16,6 +16,9 @@ from your IDE , run the ##BookingApplication.java . This is the entry point
 
 **How the use cases are approached**
 
+**Assumptions**
+The application simulates a booking for one particular given date (Single Date). Booking for multiple dates is yet to be handled.
+
 **User Story 1** : As an Admin , I should be seeing the bookings for a given date
 Once the server is up , hit http://localhost:8080/booking/listAllBookings/yyyy-mm-dd on your browser or any other API platform using the GET call.
 Your response will contain a list of bookings for that particular date.
