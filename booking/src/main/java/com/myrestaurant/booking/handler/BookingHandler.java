@@ -1,7 +1,6 @@
 package com.myrestaurant.booking.handler;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +21,6 @@ import lombok.NoArgsConstructor;
 @Path("/booking")
 @NoArgsConstructor
 public class BookingHandler<E> {
-
 	/**
 	 * Returns a list of all the bookings
 	 * <p>
@@ -44,6 +42,13 @@ public class BookingHandler<E> {
 		return bookingList;
 	}
 
+	/**
+	 * Creates a booking for a user
+	 * <p>
+	 * 
+	 * @param booking
+	 * @return A list containing all Booking Information
+	 */
 	@POST
 	@Path("/createBooking")
 	@Consumes("application/json")
@@ -53,13 +58,22 @@ public class BookingHandler<E> {
 		try {
 			response = book(booking, response);
 		} catch (Exception e) {
-			response = "Oops! Something went wrong. Please try again " + HttpResponseStatus.INTERNAL_SERVER_ERROR;
+			response = BookingInfo.INTERNAL_ERROR_TEXT + HttpResponseStatus.INTERNAL_SERVER_ERROR;
 			e.printStackTrace();
 		}
 
 		return response;
 
 	}
+
+	/**
+	 * Booking Id needs to be unique.
+	 * 
+	 * In order to simulate a DB incrementing the booking id by 1 after each
+	 * insertion
+	 * 
+	 * @param booking
+	 */
 
 	private void generateBookingId(Booking booking) {
 		List<Integer> ids = BookingInfo.bookingEntries.stream().sorted().map(b -> b.getBookingId())
@@ -75,10 +89,12 @@ public class BookingHandler<E> {
 	}
 
 	/**
-	 * This method will decrement the table availability for that day , based on the
-	 * booking information
+	 * Core logic ------------- 1. Assigns a table for the booking size 2. Check
+	 * slot conflicts and insert data
 	 * 
-	 * @param tableSize
+	 * @param booking
+	 * @param response
+	 * @return
 	 */
 	private String book(Booking booking, String response) {
 		Integer tableSize = booking.getBookingSize();
@@ -90,32 +106,48 @@ public class BookingHandler<E> {
 		 * b-> each booking iterated for the day booking -> current booking
 		 */
 		// 2 - 10
-		if (tableSize == 2 || tableSize == 3) {
-			response = handleBooking(booking, "small", response);
+		if (tableSize == 3) {
+			response = handleBooking(booking, BookingInfo.SMALL, response);
 		} else if (tableSize == 20) {
-			response = handleBooking(booking, "family", response);
+			response = handleBooking(booking, BookingInfo.FAMILY, response);
 		} else if (tableSize == 8) {
-			response = handleBooking(booking, "medium", response);
+			response = handleBooking(booking, BookingInfo.MEDIUM, response);
 		} else if (tableSize == 10) {
-			response = handleBooking(booking, "large", response);
+			response = handleBooking(booking, BookingInfo.LARGE, response);
 		} else {
-			response = "Sorry we do not have that table size! Please choose 2/3 , 8 , 10 or 20";
+			response = BookingInfo.NO_TABLES_AVAILABLE;
 		}
 		return response;
 	}
 
+	/**
+	 * Resolves time conflict and creates a booking
+	 * 
+	 * @param booking
+	 * @param tableSize
+	 * @param response
+	 * @return
+	 */
 	private String handleBooking(Booking booking, String tableSize, String response) {
-		if (BookingInfo.tables().get(tableSize).equals(0)) {
-			response = "Sorry " + tableSize + " tables are all booked for the day!";
+		/*
+		 * if (BookingInfo.tables().get(tableSize).equals(0)) {
+		 *//**
+			 * Beta - this functionality can be commented out. Just to simulate availability
+			 * of tables
+			 * 
+			 * would be helpful if there is an actual databse
+			 *//*
+				 * response = "Sorry " + tableSize + " tables are all booked for the day!"; }
+				 */
+		// else {
+		if (reslolveTimeConflict(booking).isEmpty()) {
+			BookingInfo.tables().put(tableSize, Integer.valueOf(BookingInfo.tables().get(tableSize) - 1));
+			generateBookingId(booking);
+			BookingInfo.bookingEntries.add(booking);
 		} else {
-			if (reslolveTimeConflict(booking).isEmpty()) {
-				BookingInfo.tables().put(tableSize, Integer.valueOf(BookingInfo.tables().get(tableSize) - 1));
-				generateBookingId(booking);
-				BookingInfo.bookingEntries.add(booking);
-			} else {
-				response = "Please choose another timeslot!";
-			}
+			response = "Please choose another timeslot!";
 		}
+		// }
 		return response;
 	}
 
@@ -128,12 +160,11 @@ public class BookingHandler<E> {
 	 * @return
 	 */
 	private List reslolveTimeConflict(Booking booking) {
-		List bookingConflict = BookingInfo.bookingEntries.stream().filter(b -> b.getBookingSize()
-				.equals(booking.getBookingSize())
-				&& !(((booking.getBookingTime().toLocalTime().isAfter(b.getBookingTime().toLocalTime().plusHours(2))))
-
+		List bookingConflict = BookingInfo.bookingEntries.stream().filter(b -> (b.getBookingSize()
+				.equals(booking.getBookingSize()) && booking.getBookingDate().equals(b.getBookingDate()))
+				&& !((((booking.getBookingTime().toLocalTime().isAfter(b.getBookingTime().toLocalTime().plusHours(2))))
 						|| (booking.getBookingTime().toLocalTime()
-								.isBefore(b.getBookingTime().toLocalTime().minusHours(2)))))
+								.isBefore(b.getBookingTime().toLocalTime().minusHours(2))))))
 				.collect(Collectors.toList());
 		return bookingConflict;
 	}

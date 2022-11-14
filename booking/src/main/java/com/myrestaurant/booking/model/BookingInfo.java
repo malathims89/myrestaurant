@@ -1,11 +1,9 @@
 package com.myrestaurant.booking.model;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +16,15 @@ import java.util.stream.Collectors;
  */
 public class BookingInfo {
 
+	public static final String NO_TABLES_AVAILABLE = "Sorry we do not have that table size! Please choose 2/3 , 8 , 10 or 20";
+	public static final String INTERNAL_ERROR_TEXT = "Oops! Something went wrong. Please try again ";
+
+	
+	public static final String LARGE = "large";
+	public static final String MEDIUM = "medium";
+	public static final String FAMILY = "family";
+	public static final String SMALL = "small";
+
 	private static final String APPLICATION_PROPERTIES = "application.properties";
 	private static Properties prop = new Properties();
 	private static final String TABLE_NAMES = "name";
@@ -27,7 +34,7 @@ public class BookingInfo {
 
 	// These are the tables in my restaurant for which the customer creates a
 	// booking
-	public static Map myTables = new HashMap<String, Integer>();
+	public static Map<String, Integer> myTables = new HashMap<String, Integer>();
 
 	public static Map<String, Integer> tables() {
 
